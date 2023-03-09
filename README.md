@@ -1,16 +1,12 @@
 # lingo-base-rtc
----
 
 lingo 对外曝露的rtc服务接口定义，第三方可以使用 npm 引入此包作为依赖并实现此包中定义的 interface 后，即可集成到 lingo 的电子教室中提供音视频服务。
 
 `npm install @lingoace/lingo-base-rtc --save`
 
----
-
 ## 第三方插件开发说明
----
 
-1. 创建一个新的工程
+1. 创建一个新的 npm 工程
 2. 使用 npm 引入 @lingoace/lingo-base-rtc
 3. 实现下方[表格](#表格)中列出的接口，并且对外曝露实现的 LingoRTC 类，例如：
 ```javascript
@@ -26,7 +22,6 @@ export class LingoRTC extends LingoBaseRTC implements ILingoRTC {
 
 `@lingoace/lingo-{插件方标识}-rtc`
 
----
 
 ## 目录说明
 

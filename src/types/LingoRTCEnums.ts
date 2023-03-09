@@ -23,11 +23,3 @@ export enum RTCConnectionState {
    */
   DISCONNECTING = "DISCONNECTING",
 }
-/**
- * RTC 类型
- */
-export enum RTCType{
-  Zego = 0,
-  Agora = 1,
-  Zoom = 2
-}

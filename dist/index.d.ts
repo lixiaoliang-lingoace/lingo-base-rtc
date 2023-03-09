@@ -149,7 +149,7 @@ interface ILingoLocalTrack extends ILingoTrack {
  */
 interface ILingoAudioTrack {
     /**
-     * 设置音量
+     * 设置音量 (本地设置采集、远端设置播放)
      * @param volume 音量大小，0-100
      */
     setVolume(volume: number): void;
@@ -291,20 +291,20 @@ interface ILingoScreenSharing {
     /**
      * 开启屏幕共享
      */
-    startShareScreen(): Promise<void>;
+    startScreenShare(): Promise<void>;
     /**
      * 关闭屏幕共享
      */
-    stopShareScreen(): Promise<void>;
+    stopScreenShare(): Promise<void>;
     /**
-     * 播放屏幕共享
+     * 播放远端屏幕共享
      * @param container 承载播放的 dom 容器
      */
-    playShareScreenView(container: HTMLDivElement): Promise<void>;
+    playScreenShareView(container: HTMLDivElement): Promise<void>;
     /**
-     * 停止播放屏幕共享
+     * 停止播放远端屏幕共享
      */
-    stopShareScreenView(): Promise<void>;
+    stopScreenShareView(): Promise<void>;
 }
 
 /**
@@ -331,14 +331,6 @@ declare enum RTCConnectionState {
      * 正在断开连接。在调用 leave 的时候为此状态。
      */
     DISCONNECTING = "DISCONNECTING"
-}
-/**
- * RTC 类型
- */
-declare enum RTCType {
-    Zego = 0,
-    Agora = 1,
-    Zoom = 2
 }
 
 interface LingoRTCEvent {
@@ -371,21 +363,22 @@ interface LingoRTCEvent {
      */
     UserUpdated: UserCallback;
     /**
-     * 视频采集设备状态变化回调
+     * 视频设备列表状态变化回调 新增 or 移除
      */
     CameraChanged: KindDeviceChangedCallback;
     /**
-     * 音频采集设备状态变化回调
+     * 音频设备列表状态变化回调 新增 or 移除
      */
     MicrophoneChanged: KindDeviceChangedCallback;
     /**
-     * 音频播放设备状态变化回调
+     * 音频播放设备状态变化回调 新增 or 移除
      */
     SpeakerDeviceChanged: KindDeviceChangedCallback;
     /**
      * 设备切换使用事件
+     * 抛出时机：主动切换设备，SDK 恢复采集导致设备切换
      */
-    DeciceSwitched: DeciceSwitchedCallback;
+    DeviceSwitched: DeviceSwitchedCallback;
     /**
      * 音频或视频轨道自动播放失败回调
      */
@@ -400,6 +393,8 @@ interface LingoRTCEvent {
     ScreenSharingEnded: () => void;
     /**
      * localTrack 创建成功后事件通知（不止主动调用 API 的返回值，还存在中途 localTrack 异常后重新创建的通知）
+     *
+     * custom & preview video track，不需要抛该事件,
      */
     LocalTrackCreated: LocalTrackCreatedCallback;
     /**
@@ -416,7 +411,7 @@ declare type ExceptionCallback = (code: number, msg: string, uid: string) => voi
 declare type UserCallback = (uid: string) => void;
 declare type UserPublishedCallback = (uid: string, mediaType: MediaType) => void;
 declare type KindDeviceChangedCallback = (isAdd: boolean, device: LingoDeviceInfo) => void;
-declare type DeciceSwitchedCallback = (deviceInfo: LingoDeviceInfo) => void;
+declare type DeviceSwitchedCallback = (deviceInfo: LingoDeviceInfo) => void;
 declare type AutoplayFailedCallback = () => void;
 declare type RemoteScreenSharingCallback = (uid: string, active: boolean, mediaType: MediaType) => void;
 declare type LocalTrackCreatedCallback = (localTrack: ILingoLocalTrack) => void;
@@ -668,6 +663,10 @@ interface LingoCameraVideoTrackInitConfig {
      * 指定摄像头的设备 ID
      */
     cameraId?: string;
+    width?: number;
+    height?: number;
+    frameRate?: number;
+    bitrate?: number;
 }
 /**
  * 设备检测结果
@@ -711,4 +710,4 @@ interface DetectCameraParam {
     mirror?: boolean;
 }
 
-export { AutoplayFailedCallback, ConnectionStateChangeCallback, DeciceSwitchedCallback, DetectCameraParam, DetectCameraResult, DetectDeviceResult, DetectMicrophoneResult, ExceptionCallback, ILingoAudioTrack, ILingoCameraVideoTrack, ILingoCustomVideoTrack, ILingoLocalAudioTrack, ILingoLocalTrack, ILingoLocalVideoTrack, ILingoMicrophoneAudioTrack, ILingoRTC, ILingoRTCClient, ILingoRTCJoinParam, ILingoRTCRemoteUser, ILingoRemoteAudioTrack, ILingoRemoteTrack, ILingoRemoteVideoTrack, ILingoTrack, ILingoVideoTrack, KindDeviceChangedCallback, LingoAceRTCInitParam, LingoCameraVideoTrackInitConfig, LingoDeviceInfo, LingoPlayOptions, LingoRTCEvent, LingoUserPropertiesPayload, LocalTrackCreatedCallback, MediaType, NetworkQuality, NetworkQualityCallback, QOEStats, RTCConnectionState, RTCPermissions, RTCType, RemoteScreenSharingCallback, UserCallback, UserPublishedCallback };
+export { AutoplayFailedCallback, ConnectionStateChangeCallback, DetectCameraParam, DetectCameraResult, DetectDeviceResult, DetectMicrophoneResult, DeviceSwitchedCallback, ExceptionCallback, ILingoAudioTrack, ILingoCameraVideoTrack, ILingoCustomVideoTrack, ILingoLocalAudioTrack, ILingoLocalTrack, ILingoLocalVideoTrack, ILingoMicrophoneAudioTrack, ILingoRTC, ILingoRTCClient, ILingoRTCJoinParam, ILingoRTCRemoteUser, ILingoRemoteAudioTrack, ILingoRemoteTrack, ILingoRemoteVideoTrack, ILingoTrack, ILingoVideoTrack, KindDeviceChangedCallback, LingoAceRTCInitParam, LingoCameraVideoTrackInitConfig, LingoDeviceInfo, LingoPlayOptions, LingoRTCEvent, LingoUserPropertiesPayload, LocalTrackCreatedCallback, MediaType, NetworkQuality, NetworkQualityCallback, QOEStats, RTCConnectionState, RTCPermissions, RemoteScreenSharingCallback, UserCallback, UserPublishedCallback };
