@@ -32,21 +32,22 @@ export interface LingoRTCEvent {
    */
   UserUpdated: UserCallback;
   /**
-   * 视频采集设备状态变化回调
+   * 视频设备列表状态变化回调 新增 or 移除
    */
   CameraChanged: KindDeviceChangedCallback;
   /**
-   * 音频采集设备状态变化回调
+   * 音频设备列表状态变化回调 新增 or 移除
    */
   MicrophoneChanged: KindDeviceChangedCallback;
   /**
-   * 音频播放设备状态变化回调
+   * 音频播放设备状态变化回调 新增 or 移除
    */
   SpeakerDeviceChanged: KindDeviceChangedCallback;
   /**
    * 设备切换使用事件
+   * 抛出时机：主动切换设备，SDK 恢复采集导致设备切换
    */
-  DeciceSwitched: DeciceSwitchedCallback;
+  DeviceSwitched: DeviceSwitchedCallback;
   /**
    * 音频或视频轨道自动播放失败回调
    */
@@ -61,6 +62,8 @@ export interface LingoRTCEvent {
   ScreenSharingEnded: () => void;
   /**
    * localTrack 创建成功后事件通知（不止主动调用 API 的返回值，还存在中途 localTrack 异常后重新创建的通知）
+   *
+   * custom & preview video track，不需要抛该事件,
    */
   LocalTrackCreated: LocalTrackCreatedCallback;
   /**
@@ -91,7 +94,7 @@ export declare type KindDeviceChangedCallback = (
   isAdd: boolean,
   device: LingoDeviceInfo
 ) => void;
-export declare type DeciceSwitchedCallback = (
+export declare type DeviceSwitchedCallback = (
   deviceInfo: LingoDeviceInfo
 ) => void;
 export declare type AutoplayFailedCallback = () => void;
