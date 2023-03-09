@@ -158,7 +158,7 @@ export abstract class LingoBaseRTC {
             label: this.microphoneAudioTrack.getTrackLabel(),
             kind: "audioinput",
           };
-          this.client.emit("DeciceSwitched", deviceInfo);
+          this.client.emit("DeviceSwitched", deviceInfo);
         }
       }
     }
@@ -177,7 +177,7 @@ export abstract class LingoBaseRTC {
         this.activeSpeakerId = speakerId;
         // 事件通知
         const deviceInfo = await this.getActiveSpeaker();
-        this.client.emit("DeciceSwitched", deviceInfo);
+        this.client.emit("DeviceSwitched", deviceInfo);
       }
     }
   }
@@ -200,7 +200,7 @@ export abstract class LingoBaseRTC {
         label: track ? track.getTrackLabel() : "",
         kind: "videoinput",
       };
-      this.client.emit("DeciceSwitched", deviceInfo);
+      this.client.emit("DeviceSwitched", deviceInfo);
     }
   }
   getActiveMicrophone(): Promise<LingoDeviceInfo> {

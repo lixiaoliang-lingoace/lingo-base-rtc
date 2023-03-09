@@ -84,7 +84,7 @@ export interface ILingoLocalTrack extends ILingoTrack {
  */
 export interface ILingoAudioTrack {
   /**
-   * 设置音量
+   * 设置音量 (本地设置采集、远端设置播放)
    * @param volume 音量大小，0-100
    */
   setVolume(volume: number): void;

@@ -152,6 +152,10 @@ export interface LingoCameraVideoTrackInitConfig {
    * 指定摄像头的设备 ID
    */
   cameraId?: string;
+  width?: number;
+  height?: number;
+  frameRate?: number;
+  bitrate?: number;
 }
 /**
  * 设备检测结果
