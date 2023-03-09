@@ -1,0 +1,42 @@
+{
+  "name": "lingo-base-rtc",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rimraf dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lingoace-classroom/lingo-base-rtc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lingoace-classroom/lingo-base-rtc/issues"
+  },
+  "homepage": "https://github.com/lingoace-classroom/lingo-base-rtc#readme",
+  "devDependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/plugin-transform-runtime": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-typescript": "^7.21.0",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@types/node": "^18.14.6",
+    "rimraf": "^4.3.1",
+    "rollup": "^3.18.0",
+    "rollup-plugin-dts": "^5.2.0",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.21.0",
+    "events": "^3.3.0"
+  }
+}
