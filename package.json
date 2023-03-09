@@ -1,5 +1,5 @@
 {
-  "name": "lingo-base-rtc",
+  "name": "@lingoace/lingo-base-rtc",
   "version": "0.0.1",
   "description": "",
   "main": "dist/index.js",
@@ -8,16 +8,8 @@
   "scripts": {
     "build": "rimraf dist && rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lingoace-classroom/lingo-base-rtc.git"
-  },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lingoace-classroom/lingo-base-rtc/issues"
-  },
-  "homepage": "https://github.com/lingoace-classroom/lingo-base-rtc#readme",
   "devDependencies": {
     "@babel/core": "^7.21.0",
     "@babel/plugin-transform-runtime": "^7.21.0",
@@ -38,5 +30,13 @@
   "dependencies": {
     "@babel/runtime": "^7.21.0",
     "events": "^3.3.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lixiaoliang-lingoace/lingo-base-rtc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lixiaoliang-lingoace/lingo-base-rtc/issues"
+  },
+  "homepage": "https://github.com/lixiaoliang-lingoace/lingo-base-rtc#readme"
 }
