@@ -1,8 +1,10 @@
+import { VideoProfile } from "./ILingoRTC";
+
 export interface ILingoScreenSharing {
   /**
    * 开启屏幕共享
    */
-  startScreenShare(): Promise<void>;
+  startScreenShare(config: VideoProfile): Promise<void>;
   /**
    * 关闭屏幕共享
    */

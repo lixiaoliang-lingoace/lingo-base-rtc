@@ -144,18 +144,22 @@ export interface LingoAceRTCInitParam {
     server: string;
   };
 }
-/**
- * 创建摄像头视频轨道的配置对象
- */
-export interface LingoCameraVideoTrackInitConfig {
-  /**
-   * 指定摄像头的设备 ID
-   */
-  cameraId?: string;
+
+export interface VideoProfile {
   width?: number;
   height?: number;
   frameRate?: number;
   bitrate?: number;
+}
+
+/**
+ * 创建摄像头视频轨道的配置对象
+ */
+export interface LingoCameraVideoTrackInitConfig extends VideoProfile {
+  /**
+   * 指定摄像头的设备 ID
+   */
+  cameraId?: string;
 }
 /**
  * 设备检测结果
