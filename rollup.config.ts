@@ -35,7 +35,7 @@ const config: RollupOptions = {
   ],
 };
 const dtsConfig: RollupOptions = {
-  input: "src/types/index.ts",
+  input: "src/index.ts",
   output: [
     {
       file: "dist/index.d.ts",

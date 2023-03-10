@@ -1,3 +1,30 @@
+import EventEmitter from 'events';
+
+declare const config: {
+    isDev: boolean;
+    localUid: string;
+    screenSharingUid: string;
+    screenSharingSize: {
+        width: number;
+        height: number;
+    };
+    captureSize: {
+        width: number;
+        height: number;
+    };
+};
+
+declare abstract class LingoBaseTrack {
+}
+
+declare abstract class LingoBaseRemoteTrack extends LingoBaseTrack {
+    /**
+     * 该轨道所属的用户 userId
+     * 一般是用户加入频道时才有值，所以本地用户可能会是空字符串
+     */
+    uid: string;
+}
+
 /**
  * 媒体轨道类型
  */
@@ -291,7 +318,7 @@ interface ILingoScreenSharing {
     /**
      * 开启屏幕共享
      */
-    startScreenShare(): Promise<void>;
+    startScreenShare(config: VideoProfile): Promise<void>;
     /**
      * 关闭屏幕共享
      */
@@ -655,18 +682,20 @@ interface LingoAceRTCInitParam {
         server: string;
     };
 }
-/**
- * 创建摄像头视频轨道的配置对象
- */
-interface LingoCameraVideoTrackInitConfig {
-    /**
-     * 指定摄像头的设备 ID
-     */
-    cameraId?: string;
+interface VideoProfile {
     width?: number;
     height?: number;
     frameRate?: number;
     bitrate?: number;
+}
+/**
+ * 创建摄像头视频轨道的配置对象
+ */
+interface LingoCameraVideoTrackInitConfig extends VideoProfile {
+    /**
+     * 指定摄像头的设备 ID
+     */
+    cameraId?: string;
 }
 /**
  * 设备检测结果
@@ -710,4 +739,162 @@ interface DetectCameraParam {
     mirror?: boolean;
 }
 
-export { AutoplayFailedCallback, ConnectionStateChangeCallback, DetectCameraParam, DetectCameraResult, DetectDeviceResult, DetectMicrophoneResult, DeviceSwitchedCallback, ExceptionCallback, ILingoAudioTrack, ILingoCameraVideoTrack, ILingoCustomVideoTrack, ILingoLocalAudioTrack, ILingoLocalTrack, ILingoLocalVideoTrack, ILingoMicrophoneAudioTrack, ILingoRTC, ILingoRTCClient, ILingoRTCJoinParam, ILingoRTCRemoteUser, ILingoRemoteAudioTrack, ILingoRemoteTrack, ILingoRemoteVideoTrack, ILingoTrack, ILingoVideoTrack, KindDeviceChangedCallback, LingoAceRTCInitParam, LingoCameraVideoTrackInitConfig, LingoDeviceInfo, LingoPlayOptions, LingoRTCEvent, LingoUserPropertiesPayload, LocalTrackCreatedCallback, MediaType, NetworkQuality, NetworkQualityCallback, QOEStats, RTCConnectionState, RTCPermissions, RemoteScreenSharingCallback, UserCallback, UserPublishedCallback };
+declare abstract class LingoBaseRTC {
+    /**
+     * LingoRTC SDK 版本信息
+     */
+    lingoVersion: string;
+    client: ILingoRTCClient;
+    /**
+     * 本地音频，全局共享一个实例
+     */
+    microphoneAudioTrack: ILingoMicrophoneAudioTrack | undefined;
+    /**
+     * 设备检测专用本地视频
+     * 为什么用两个实例？是因为同一个VideoTrack只能同一时间渲染到一个元素上，当前课中设备检测和上课视频画面会同时存在，所以使用两个VideoTrack
+     */
+    previewVideoTrack: ILingoCameraVideoTrack | undefined;
+    /**
+     * 本地视频，摄像头渲染
+     */
+    cameraVideoTrack: ILingoCameraVideoTrack | undefined;
+    /**
+     * 自定义视频
+     */
+    customVideoTrack: ILingoCustomVideoTrack | undefined;
+    /**
+     * 记录当前使用的扬声器设备id
+     */
+    activeSpeakerId: string;
+    /**
+     * 当前本端视频镜像状态
+     * 使用全局管理模式，确保各处视频画面镜像状态一致，修改此值需要同步所有的 localVideoTrack
+     */
+    mirrored: boolean;
+    /**
+     * 创建本地麦克风轨道，由各家 sdk 具体实现
+     */
+    abstract createMicrophoneAudioTrack(microphoneId?: string): Promise<ILingoMicrophoneAudioTrack>;
+    /**
+     * 创建本地摄像头轨道，由各家 sdk 具体实现
+     */
+    abstract createCameraVideoTrack(config: LingoCameraVideoTrackInitConfig): Promise<ILingoCameraVideoTrack>;
+    /**
+     * 检查浏览器音视频权限
+     * @param checkType 不传参数则音视频权限两个都检查
+     */
+    checkPermissions(checkType?: MediaType): Promise<RTCPermissions>;
+    /**
+     * 获取设备列表
+     */
+    private getDevicesCore;
+    getDevices(skipPermissionCheck?: boolean): Promise<MediaDeviceInfo[]>;
+    getCameras(skipPermissionCheck?: boolean): Promise<MediaDeviceInfo[]>;
+    getMicrophones(skipPermissionCheck?: boolean): Promise<MediaDeviceInfo[]>;
+    getSpeakerDevices(skipPermissionCheck?: boolean): Promise<MediaDeviceInfo[]>;
+    setMicrophoneDevice(microphoneId: string): Promise<void>;
+    setSpeakerDevice(speakerId: string): Promise<void>;
+    setCameraDevice(cameraId: string): Promise<void>;
+    getActiveMicrophone(): Promise<LingoDeviceInfo>;
+    /**
+     * 获取正在使用的扬声器
+     */
+    getActiveSpeaker(): Promise<LingoDeviceInfo>;
+    /**
+     * 获取正在使用的摄像头
+     */
+    getActiveCamera(): Promise<LingoDeviceInfo>;
+    /**
+     * 释放音视频资源，使用同步调用的方式直接执行（立即执行），调用方不关心结果
+     */
+    release(): void;
+    /**
+     * 麦克风检测
+     */
+    detectMicrophone(microphoneId?: string): Promise<DetectMicrophoneResult>;
+    mirrorVideo(mirror: boolean): void;
+    /**
+     * 检测当前本地音视频轨道的设备id是否可用，如果不可用则切换到其他的设备id
+     */
+    checkAndSetDevice(): Promise<void>;
+    resumeLocalTracks(): Promise<void>;
+}
+
+declare abstract class LingoBaseRTCClient {
+    eventEmitter: EventEmitter;
+    uid: string;
+    /**
+     * 加入频道参数
+     */
+    joinParam: ILingoRTCJoinParam | undefined;
+    /**
+     * 当前的连接状态
+     */
+    connectionState: RTCConnectionState;
+    /**
+     * 当前推送的轨道
+     */
+    localTracks: ILingoLocalTrack[];
+    /**
+     * 记录每个用户的音频 track ，key = uid
+     */
+    remoteAudioTrackMap: Map<string, ILingoRemoteAudioTrack>;
+    /**
+     * 记录每个用户的视频 track ，key = uid
+     */
+    remoteVideoTrackMap: Map<string, ILingoRemoteVideoTrack>;
+    /**
+     * 判断是否是屏幕共享
+     */
+    protected isScreenSharing(uid: number | string): boolean;
+    /**
+     * 删除远端用户对应的 track（当远端用户取消发流/本端主动取消订阅，需要删除对应用户的 track）
+     */
+    protected deleteRemoteTrack(uid: string, mediaType: MediaType): void;
+    /**
+     * 注册回调事件
+     * @param event 事件名
+     * @param callBack 回调函数
+     */
+    on<K extends keyof LingoRTCEvent>(event: K, callBack: LingoRTCEvent[K]): void;
+    once<K extends keyof LingoRTCEvent>(event: K, callBack: LingoRTCEvent[K]): void;
+    off<K extends keyof LingoRTCEvent>(event: K, callBack: LingoRTCEvent[K]): void;
+    emit<K extends keyof LingoRTCEvent>(event: K, ...args: any[]): void;
+}
+
+/**
+ * 公共的共享数据存储
+ */
+declare abstract class LingoBaseStore {
+}
+
+/**
+ * 统一不同 rtc sdk 的对外抛出的错误
+ */
+declare enum LingoRTCErrorCode {
+    NotSupported = "NotSupported",
+    PermissionDenied = "PermissionDenied",
+    DeviceNotFound = "DeviceNotFound",
+    NotReadable = "NotReadable",
+    Other = "Other"
+}
+declare class LingoRTCError extends Error {
+    readonly name: string;
+    readonly code: LingoRTCErrorCode;
+    readonly message: string;
+    constructor(code: LingoRTCErrorCode, message?: string);
+    /**
+     * 将普通 Error 对象转成 LingoRTCError
+     * @param error Error
+     * @returns LingoRTCError
+     */
+    static createRTCError(error: Error): LingoRTCError;
+    /**
+     * 创建一个 LIngoRTCError.Other 的错误
+     * @param message 错误消息
+     * @returns LingoRTCError
+     */
+    static createOtherError(message: string): LingoRTCError;
+}
+
+export { AutoplayFailedCallback, ConnectionStateChangeCallback, DetectCameraParam, DetectCameraResult, DetectDeviceResult, DetectMicrophoneResult, DeviceSwitchedCallback, ExceptionCallback, ILingoAudioTrack, ILingoCameraVideoTrack, ILingoCustomVideoTrack, ILingoLocalAudioTrack, ILingoLocalTrack, ILingoLocalVideoTrack, ILingoMicrophoneAudioTrack, ILingoRTC, ILingoRTCClient, ILingoRTCJoinParam, ILingoRTCRemoteUser, ILingoRemoteAudioTrack, ILingoRemoteTrack, ILingoRemoteVideoTrack, ILingoTrack, ILingoVideoTrack, KindDeviceChangedCallback, LingoAceRTCInitParam, LingoBaseRTC, LingoBaseRTCClient, LingoBaseRemoteTrack, LingoBaseStore, LingoBaseTrack, LingoCameraVideoTrackInitConfig, LingoDeviceInfo, LingoPlayOptions, LingoRTCError, LingoRTCErrorCode, LingoRTCEvent, LingoUserPropertiesPayload, LocalTrackCreatedCallback, MediaType, NetworkQuality, NetworkQualityCallback, QOEStats, RTCConnectionState, RTCPermissions, RemoteScreenSharingCallback, UserCallback, UserPublishedCallback, VideoProfile, config };
