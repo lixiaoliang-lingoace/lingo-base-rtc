@@ -321,14 +321,16 @@ export abstract class LingoBaseRTC {
     };
   }
   mirrorVideo(mirror: boolean) {
-    this.mirrored = mirror;
     [
-      (this.previewVideoTrack, this.cameraVideoTrack, this.customVideoTrack),
+      this.previewVideoTrack,
+      this.cameraVideoTrack,
+      this.customVideoTrack,
     ].forEach((videoTrack) => {
       if (videoTrack) {
         videoTrack.mirrorVideo(mirror);
       }
     });
+    this.mirrored = mirror;
   }
   /**
    * 检测当前本地音视频轨道的设备id是否可用，如果不可用则切换到其他的设备id

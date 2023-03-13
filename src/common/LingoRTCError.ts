@@ -23,7 +23,10 @@ export class LingoRTCError extends Error {
    * @param error Error
    * @returns LingoRTCError
    */
-  static createRTCError(error: Error) {
+  static createRTCError(error: Error): LingoRTCError {
+    if (error.name === LingoRTCError.name) {
+      return error as LingoRTCError;
+    }
     const errorName = error.name;
     const message = error.message;
     if (errorName === "NotAllowedError") {
@@ -44,5 +47,8 @@ export class LingoRTCError extends Error {
    */
   static createOtherError(message: string) {
     return new LingoRTCError(LingoRTCErrorCode.Other, message);
+  }
+  toString() {
+    return `Name=${this.name},code=${this.code},message=${this.message}`;
   }
 }

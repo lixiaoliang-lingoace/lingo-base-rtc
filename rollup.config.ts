@@ -7,7 +7,7 @@ import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
 
 // import pkg from './package.json' assert { type: 'json' };
-const isProduction = true;
+const isProduction = false;
 
 const extensions = [".js", ".ts", ".json"];
 
