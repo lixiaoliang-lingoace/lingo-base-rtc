@@ -177,60 +177,34 @@ class LingoBaseRTC {
   }
   async setMicrophoneDevice(microphoneId) {
     if (this.microphoneAudioTrack) {
-      const currentDeviceId = this.microphoneAudioTrack.getDeviceId();
-      if (currentDeviceId !== microphoneId) {
-        await this.microphoneAudioTrack.setDevice(microphoneId);
-        // 事件通知
-        if (this.client) {
-          const deviceInfo = {
-            deviceId: microphoneId,
-            label: this.microphoneAudioTrack.getTrackLabel(),
-            kind: "audioinput"
-          };
-          this.client.emit("DeviceSwitched", deviceInfo);
-        }
-      }
+      // deviceId = default 时，有可能和上一个 default 是不同的设备
+      await this.microphoneAudioTrack.setDevice(microphoneId);
     }
   }
   async setSpeakerDevice(speakerId) {
-    const currentDeviceId = this.activeSpeakerId;
-    if (currentDeviceId !== speakerId) {
-      if (this.client) {
-        const remoteUsers = this.client.getRemoteUsers();
-        remoteUsers.forEach(user => {
-          const audioTrack = user.audioTrack;
-          if (audioTrack) {
-            audioTrack.setSpeakerDevice(speakerId);
-          }
-        });
-        this.activeSpeakerId = speakerId;
-        // 事件通知
-        const deviceInfo = await this.getActiveSpeaker();
-        this.client.emit("DeviceSwitched", deviceInfo);
-      }
+    if (this.client) {
+      const remoteUsers = this.client.getRemoteUsers();
+      remoteUsers.forEach(user => {
+        const audioTrack = user.audioTrack;
+        if (audioTrack) {
+          audioTrack.setSpeakerDevice(speakerId);
+        }
+      });
+      this.activeSpeakerId = speakerId;
+      // 事件通知
+      const deviceInfo = await this.getActiveSpeaker();
+      this.client.emit("DeviceSwitched", deviceInfo);
     }
   }
   async setCameraDevice(cameraId) {
-    let isSwitched = false;
     const jobs = [this.cameraVideoTrack, this.previewVideoTrack].map(item => {
-      if (item && item.getDeviceId() !== cameraId) {
-        isSwitched = true;
+      if (item) {
         return item.setDevice(cameraId);
       } else {
         return Promise.resolve();
       }
     });
     await Promise.allSettled(jobs);
-    // 事件通知
-    if (this.client && isSwitched) {
-      const track = this.cameraVideoTrack || this.previewVideoTrack;
-      const deviceInfo = {
-        deviceId: cameraId,
-        label: track ? track.getTrackLabel() : "",
-        kind: "videoinput"
-      };
-      this.client.emit("DeviceSwitched", deviceInfo);
-    }
   }
   getActiveMicrophone() {
     const result = {
@@ -355,19 +329,19 @@ class LingoBaseRTC {
       const devices = await this.getDevices(true);
       const checkList = [{
         kind: "audioinput",
-        getDevice: this.getActiveMicrophone,
-        setDevice: this.setMicrophoneDevice
+        getDevice: this.getActiveMicrophone.bind(this),
+        setDevice: this.setMicrophoneDevice.bind(this)
       }, {
         kind: "videoinput",
-        getDevice: this.getActiveCamera,
-        setDevice: this.setCameraDevice
+        getDevice: this.getActiveCamera.bind(this),
+        setDevice: this.setCameraDevice.bind(this)
       }];
       const promiseList = checkList.map(item => {
         return new Promise(async function (resolve) {
           const kindList = devices.filter(p => p.kind === item.kind);
           const currentDevice = await item.getDevice();
-          // 当前的设备id已不可用，重新指定一个
-          if (kindList.length > 0 && !kindList.some(p => p.deviceId === currentDevice.deviceId)) {
+          if (kindList.length > 0 && currentDevice.deviceId && !kindList.some(p => p.deviceId === currentDevice.deviceId)) {
+            // 当前的设备id已不可用，重新指定一个
             for (let i = 0; i < kindList.length; i++) {
               const deviceInfo = kindList[i];
               try {

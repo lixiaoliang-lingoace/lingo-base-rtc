@@ -402,7 +402,7 @@ interface LingoRTCEvent {
      */
     SpeakerDeviceChanged: KindDeviceChangedCallback;
     /**
-     * 设备切换使用事件
+     * 本端设备切换使用事件
      * 抛出时机：主动切换设备，SDK 恢复采集导致设备切换
      */
     DeviceSwitched: DeviceSwitchedCallback;
