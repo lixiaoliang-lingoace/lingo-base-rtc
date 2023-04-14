@@ -9,7 +9,7 @@ export enum LingoRTCErrorCode {
   Other = "Other",
 }
 export class LingoRTCError extends Error {
-  readonly name = LingoRTCError.name;
+  readonly name = "LingoRTCError"; // 不能使用 LingoRTCError.name ，代码构建后会变为 'r'
   readonly code: LingoRTCErrorCode;
   readonly message: string;
 

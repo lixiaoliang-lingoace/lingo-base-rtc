@@ -60,11 +60,12 @@ src/types 目录下是用到的所有的 TypeScript 类型定义
 ![](https://github.com/lixiaoliang-lingoace/lingo-base-rtc/blob/master/docs/relation.png)
 
 ## 自采集
-
+自采集的核心是依赖摄像头采集的画面进行二次加工
 #### 执行步骤说明
-1. 创建摄像头采集（createCameraVideoTrack）
-2. 创建自采集（createCustomVideoTrack）并 init
-3. 调用customVideoTrack.play （play 其实就是将摄像头采集的画面绘制到一个 canvas 上，然后调用 play 方法传递的参数中的 onDraw 回调函数，交给业务侧进行canvas画面二次加工）
+1. 创建摄像头采集（LingoRTC.createCameraVideoTrack）
+2. 创建自采集（LingoRTC.createCustomVideoTrack）并 init
+3. 调用customVideoTrack.play （play 其实就是创建了一个时钟绘制，定时将摄像头采集的画面绘制到一个 canvas 上，然后调用 play 方法传递的参数中的 onDraw 回调函数，交给业务侧进行canvas画面二次加工）
+4. 推送customVideoTrack视频流（LingoRTCClient.publish）
 
 ## 事件
 lingo-base-rtc包中的interface `LingoRTCEvent ` 定义了插件方需要抛出的事件，事件参数请看TypeScript的类型定义说明
