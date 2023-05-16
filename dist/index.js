@@ -45,7 +45,7 @@ var LingoRTCErrorCode;
 class LingoRTCError extends Error {
   constructor(code, message) {
     super();
-    this.name = LingoRTCError.name;
+    this.name = "LingoRTCError";
     this.code = code;
     this.message = message || "";
   }
@@ -277,6 +277,8 @@ class LingoBaseRTC {
     // 因为麦克风是共用的，所以这里要判断是否应该创建
     if (!this.microphoneAudioTrack || this.microphoneAudioTrack.closed) {
       await this.createMicrophoneAudioTrack(microphoneId);
+    } else if (microphoneId) {
+      await this.microphoneAudioTrack.setDevice(microphoneId);
     }
     // 获取音量，提供给应用层调用
     const getVolumeLevel = () => {

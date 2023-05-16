@@ -370,7 +370,7 @@ interface LingoRTCEvent {
      */
     Exception: ExceptionCallback;
     /**
-     * 远端用户或主播加入频道回调
+     * 远端用户加入频道回调
      */
     UserJoined: UserCallback;
     /**
@@ -387,23 +387,23 @@ interface LingoRTCEvent {
     UserUnpublished: UserPublishedCallback;
     /**
      * 用户状态更新，用于 用户加入频道/离开频道/推流/取消推流 之外的其他事件导致用户状态变化的补充通知
+     * 此事件为非必须的，一般情况可不用
      */
     UserUpdated: UserCallback;
     /**
-     * 视频设备列表状态变化回调 新增 or 移除
+     * 视频设备列表变化回调 新增 or 移除
      */
     CameraChanged: KindDeviceChangedCallback;
     /**
-     * 音频设备列表状态变化回调 新增 or 移除
+     * 音频输入设备列表变化回调 新增 or 移除
      */
     MicrophoneChanged: KindDeviceChangedCallback;
     /**
-     * 音频播放设备状态变化回调 新增 or 移除
+     * 音频播放设备列表变化回调 新增 or 移除
      */
     SpeakerDeviceChanged: KindDeviceChangedCallback;
     /**
-     * 本端设备切换使用事件
-     * 抛出时机：主动切换设备，SDK 恢复采集导致设备切换
+     * 本端当前使用的设备变化
      */
     DeviceSwitched: DeviceSwitchedCallback;
     /**
@@ -412,6 +412,7 @@ interface LingoRTCEvent {
     AutoplayFailed: AutoplayFailedCallback;
     /**
      * 远端用户 开启/结束 屏幕共享
+     * 当前各端约定屏幕共享的用户身份 uid = 1，且同一时间只存在一个屏幕共享
      */
     RemoteScreenSharing: RemoteScreenSharingCallback;
     /**
@@ -419,13 +420,14 @@ interface LingoRTCEvent {
      */
     ScreenSharingEnded: () => void;
     /**
-     * localTrack 创建成功后事件通知（不止主动调用 API 的返回值，还存在中途 localTrack 异常后重新创建的通知）
-     *
-     * custom & preview video track，不需要抛该事件,
+     * ILingoMicrophoneAudioTrack 或 ILingoCameraVideoTrack 创建成功后事件通知
+     * 因为不止存在主动调用 create，还可能存在中途 localTrack 异常后重新创建 localTrack 的情况
+     * 所以只要 ILingoMicrophoneAudioTrack 或 ILingoCameraVideoTrack 新建后就抛出此事件，业务侧会更新引用
      */
     LocalTrackCreated: LocalTrackCreatedCallback;
     /**
      * 虚拟背景过载事件
+     * 业务侧收到此事件后会根据情况调整虚拟背景策略（可能会主动关闭虚拟背景）
      */
     VirtualBackgroundOverload: () => void;
     /**
@@ -433,14 +435,20 @@ interface LingoRTCEvent {
      */
     NetworkQuality: NetworkQualityCallback;
 }
-declare type ConnectionStateChangeCallback = (curState: RTCConnectionState, revState: RTCConnectionState, reason: string) => void;
-declare type ExceptionCallback = (code: number, msg: string, uid: string) => void;
+declare type ConnectionStateChangeCallback = (curState: RTCConnectionState, // 当前连接状态
+revState: RTCConnectionState, // 上一个连接状态
+reason: string) => void;
+declare type ExceptionCallback = (code: number, // 异常代码（lingo暂时未做统一定义，后续有需求再处理，目前仅用于日志收集排障使用）
+msg: string, // 异常消息
+uid: string) => void;
 declare type UserCallback = (uid: string) => void;
 declare type UserPublishedCallback = (uid: string, mediaType: MediaType) => void;
-declare type KindDeviceChangedCallback = (isAdd: boolean, device: LingoDeviceInfo) => void;
+declare type KindDeviceChangedCallback = (isAdd: boolean, // 是插入还是拔出设备
+device: LingoDeviceInfo) => void;
 declare type DeviceSwitchedCallback = (deviceInfo: LingoDeviceInfo) => void;
 declare type AutoplayFailedCallback = () => void;
-declare type RemoteScreenSharingCallback = (uid: string, active: boolean, mediaType: MediaType) => void;
+declare type RemoteScreenSharingCallback = (uid: string, active: boolean, // 是开启还是关闭
+mediaType: MediaType) => void;
 declare type LocalTrackCreatedCallback = (localTrack: ILingoLocalTrack) => void;
 declare type NetworkQualityCallback = (stat: NetworkQuality) => void;
 
@@ -879,7 +887,7 @@ declare enum LingoRTCErrorCode {
     Other = "Other"
 }
 declare class LingoRTCError extends Error {
-    readonly name: string;
+    readonly name = "LingoRTCError";
     readonly code: LingoRTCErrorCode;
     readonly message: string;
     constructor(code: LingoRTCErrorCode, message?: string);
